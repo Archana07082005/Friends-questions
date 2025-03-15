@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funny Questions</title>
+    <style>
+        /* Fun background with emojis */
+        body {
+            font-family: Arial, sans-serif;
+            background: #fff;
+            background-image: url('https://emoji.gg/assets/emoji/10046-heart-eyes.png');
+            background-repeat: repeat;
+            background-size: 50px 50px;
+            padding: 20px;
+            margin: 0;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3rem;
+            color: #ff6347;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Flashing animation for the questions */
+        @keyframes flash {
+            0% { color: #ff6347; }
+            50% { color: #32cd32; }
+            100% { color: #ff6347; }
+        }
+
+        label {
+            font-size: 1.5rem;
+            animation: flash 1.5s ease-in-out infinite;
+        }
+
+        input, button {
+            font-size: 1.2rem;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 2px solid #ccc;
+        }
+
+        button {
+            background-color: #ff6347;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #32cd32;
+        }
+
+        /* Hidden elements initially */
+        .hidden { 
+            display: none;
+        }
+
+        /* Animal face image style */
+        #animal_face img {
+            width: 250px;
+            animation: bounce 1s infinite;
+        }
+
+        /* Animation to make the animal face bounce */
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        /* Style for the message before showing animal image */
+        #pre_animal_message {
+            font-size: 2.5rem;
+            text-align: center;
+            color: #ff6347;
+            margin-top: 20px;
+            animation: fadeIn 2s forwards;
+        }
+
+        /* Fade-in animation for the pre-animal message */
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        #final_message {
+            font-size: 2rem;
+            text-align: center;
+            margin-top: 20px;
+            color: #32cd32;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome! Please fill in the questions below:</h1>
+
+    <!-- Step 1: Ask for name -->
+    <div id="step1">
+        <label for="name">1. Hello! Tell me your name:</label>
+        <input type="text" id="name" name="name">
+        <button onclick="checkName()">Submit</button>
+    </div>
+
+    <!-- Step 2: Show next question if name is correct -->
+    <div id="step2" class="hidden">
+        <label for="good_deed">2. Have you done any good deeds in life? (Yes/No):</label>
+        <input type="text" id="good_deed" name="good_deed">
+        <button onclick="checkGoodDeed()">Submit</button>
+    </div>
+
+    <!-- Step 3: Show pre-animal message -->
+    <div id="pre_animal_message" class="hidden">
+        <p>Chalo, tumhe tumhari pic dikhati hu!</p>
+    </div>
+
+    <!-- Step 4: Show animal face if name is correct -->
+    <div id="step3" class="hidden">
+        <p id="animal_face"></p>
+        <button onclick="finish()">Finish</button>
+    </div>
+
+    <!-- Final Message -->
+    <div id="final_message" class="hidden">
+        <p>Chalo thik hai, Ram Ram!</p>
+    </div>
+
+    <script>
+        let correctNames = ["Priya", "Tarun", "Manav", "Daisy", "Lavanya", "Archana", "Payal"];
+        let userName = "";
+        let animalImages = {
+            "Priya": "https://images.unsplash.com/photo-1502031176098-2e91ccc16e59?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Peacock
+            "Payal": "https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Rabbit
+            "Daisy": "https://images.unsplash.com/photo-1604076150017-48b528308aa3?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Goat
+            "Tarun": "https://images.unsplash.com/photo-1625859043880-56acbcb6a6ac?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Bonnet Monkey
+            "Manav": "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?q=80&w=2076&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Bonnet Monkey
+            "Lavanya": "https://images.unsplash.com/photo-1567112098492-382825853bdd?q=80&w=1965&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Swan (Use Peacock as a placeholder)
+            "Archana": "https://images.unsplash.com/photo-1524083615948-77168224375a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" // Default image (Peacock)
+        };
+
+        function checkName() {
+            userName = document.getElementById("name").value.trim();
+            if (correctNames.includes(userName)) {
+                document.getElementById("step1").classList.add("hidden");
+                document.getElementById("step2").classList.remove("hidden");
+            } else {
+                alert("Fraud logo ke liye koi questions nahi!");
+            }
+        }
+
+        function checkGoodDeed() {
+            let goodDeed = document.getElementById("good_deed").value.trim().toLowerCase();
+            if (goodDeed === "yes") {
+                alert("Ache kaam ka nateeza tumhe mil chuka h tbhi Archana tumhari dost h");
+            } else {
+                alert("Duniya me krne kya aaye ho...");
+            }
+
+            document.getElementById("step2").classList.add("hidden");
+            showPreAnimalMessage();
+        }
+
+        function showPreAnimalMessage() {
+            document.getElementById("pre_animal_message").classList.remove("hidden");
+
+            // After 3 seconds, show the animal face
+            setTimeout(showAnimalFace, 3000); // 3-second delay
+        }
+
+        function showAnimalFace() {
+            document.getElementById("pre_animal_message").classList.add("hidden");
+            document.getElementById("step3").classList.remove("hidden");
+            let animal = animalImages[userName] || animalImages["Archana"]; // Default to Archana's image if not listed
+            document.getElementById("animal_face").innerHTML = `<img src="${animal}" alt="Animal Face">`;
+        }
+
+        function finish() {
+            document.getElementById("step3").classList.add("hidden");
+            document.getElementById("final_message").classList.remove("hidden");
+
+            // Here you can send the responses to a server to store them privately
+            sendResponses();
+        }
+
+        function sendResponses() {
+            // In a real scenario, this function would send the data to a server using AJAX or fetch
+            console.log("Responses sent to the server.");
+        }
+    </script>
+</body>
+</html>
